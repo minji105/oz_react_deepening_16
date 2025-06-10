@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import TodoForm from './TodoForm';
 import TodoList from './TodoList';
 import TodoFilter from './TodoFilter';
@@ -10,7 +10,7 @@ const Todo = () => {
 
     const generateId = () => Math.floor(Math.random() * 10000);
 
-    const handleAdd = (text) => {
+    const handleAdd = useCallback((text) => {
         const newTodo = {
             id: generateId(),
             text,
@@ -18,24 +18,24 @@ const Todo = () => {
             createdAt: new Date(),
         };
 
-        setTodos([...todos, newTodo]);
-    };
+        setTodos((prev) => [...prev, newTodo]);
+    }, []);
 
-    const handleToggle = (id) => {
-        setTodos(todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
-    };
+    const handleToggle = useCallback((id) => {
+        setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
+    }, []);
 
-    const handleDelete = (id) => {
-        setTodos(todos.filter((todo) => todo.id !== id));
-    };
+    const handleDelete = useCallback((id) => {
+        setTodos((prev) => prev.filter((todo) => todo.id !== id));
+    }, []);
 
-    const handleEdit = (id, newText) => {
-        setTodos(todos.map((todo) => (todo.id === id ? { ...todo, text: newText } : todo)));
-    };
+    const handleEdit = useCallback((id, newText) => {
+        setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, text: newText } : todo)));
+    }, []);
 
-    const handleFilterChange = (newFilter) => {
+    const handleFilterChange = useCallback((newFilter) => {
         setFilter(newFilter);
-    };
+    }, []);
 
     const getFilteredTodos = () => {
         switch (filter) {
@@ -48,7 +48,9 @@ const Todo = () => {
         }
     };
 
-    const filteredTodos = getFilteredTodos();
+    const filteredTodos = useMemo(() => {
+        return getFilteredTodos();
+    }, [todos, filter]);
 
     return (
         <div className="max-w-xl mx-auto p-5">
